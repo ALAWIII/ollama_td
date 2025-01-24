@@ -1,0 +1,11 @@
+[package]
+name = "ollama_td"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+octocrab = "0.43.0"
+tokio = { version = "1.43.0", features = ["full"] }
+reqwest = "0.12.12"
+sys-info = "0.9.1"                                  # to get the os kernel type {linux ,Windows ,Darwin}
+# regex = "1.11.1"
