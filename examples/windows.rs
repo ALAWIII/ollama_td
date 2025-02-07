@@ -1,38 +1,49 @@
 use ollama_td::*;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[tokio::main]
 async fn main() -> OResult<()> {
-    let w_x86 = Platform::Windows(Windows::X86);
-    let w_arm = Platform::Windows(Windows::Arm);
-    let w_exe = Platform::Windows(Windows::BinExe);
-
     let d_location = Path::new(".");
 
-    let o_d_x86 = OllamaDownload::builder()?
-        .platform(w_x86)
-        .d_location(d_location)
-        .tag_version(TVersion::Latest)
-        .build()?;
+    let down_x86 = o_d_x86(d_location).await?;
+    let down_arm = o_d_arm(d_location).await?;
+    let down_exe = o_d_exe(d_location).await?;
 
-    let o_d_arm = OllamaDownload::builder()?
-        .platform(w_arm)
-        .d_location(d_location)
-        .tag_version(TVersion::Tag("v0.5.7".to_string()))
-        .build()?;
-
-    let o_d_exe = OllamaDownload::builder()?
-        .platform(w_exe)
-        .d_location(d_location)
-        .tag_version(TVersion::Tag("v0.5.7".to_string()))
-        .build()?;
-
-    let down_x86 = download(o_d_x86).await?; // returns the path when successfully downloading the tool!
-    let down_arm = download(o_d_arm).await?;
-    let down_exe = download(o_d_exe).await?;
-
-    assert_eq!(down_x86.to_str().unwrap(), "./ollama-windows-amd64.zip ");
+    assert_eq!(down_x86.to_str().unwrap(), "./ollama-windows-amd64.zip");
     assert_eq!(down_arm.to_str().unwrap(), "./ollama-windows-arm64.zip");
     assert_eq!(down_exe.to_str().unwrap(), "./OllamaSetup.exe");
+
     Ok(())
+}
+
+// general function function to be used among defferent other function examples !!
+async fn download_ollama(
+    d_location: &Path,
+    platform: Platform,
+    tag_version: TVersion,
+) -> OResult<PathBuf> {
+    let o_download = OllamaDownload::builder()?
+        .platform(platform)
+        .d_location(d_location)
+        .tag_version(tag_version)
+        .build()?;
+
+    download(o_download).await
+}
+
+// downloads [ollama-windows-amd64.zip]
+async fn o_d_x86(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Windows(Windows::X86);
+    download_ollama(d_location, platform, TVersion::Latest).await
+}
+// downloads [ollama-windows-arm64.zip]
+async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Windows(Windows::Arm);
+    download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
+}
+
+// downloads [OllamaSetup.exe]
+async fn o_d_exe(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Windows(Windows::BinExe);
+    download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
 }

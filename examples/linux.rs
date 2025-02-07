@@ -1,63 +1,73 @@
 use ollama_td::*;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[tokio::main]
 async fn main() -> OResult<()> {
-    let l_x86 = Platform::Linux(Linux::X86 { rocm: false });
-    let l_x86_rocm = Platform::Linux(Linux::X86 { rocm: true });
-    let l_arm = Platform::Linux(Linux::Arm(LinuxArm::Arm));
-    let l_arm_jet5 = Platform::Linux(Linux::Arm(LinuxArm::Jetpack5));
-    let l_arm_jet6 = Platform::Linux(Linux::Arm(LinuxArm::Jetpack6));
-
     let d_location = Path::new(".");
 
-    let o_x86 = OllamaDownload::builder()?
-        .platform(l_x86)
-        .tag_version(TVersion::Latest)
-        .d_location(d_location)
-        .build()?;
-    let o_x86_rocm = OllamaDownload::builder()?
-        .platform(l_x86_rocm)
-        .tag_version(TVersion::Latest)
-        .d_location(d_location)
-        .build()?;
-    let o_arm = OllamaDownload::builder()?
-        .platform(l_arm)
-        .tag_version(TVersion::Latest)
-        .d_location(d_location)
-        .build()?;
-    let o_arm_jet5 = OllamaDownload::builder()?
-        .platform(l_arm_jet5)
-        .tag_version(TVersion::Latest)
-        .d_location(d_location)
-        .build()?;
-    let o_arm_jet6 = OllamaDownload::builder()?
-        .platform(l_arm_jet6)
-        .tag_version(TVersion::Latest)
-        .d_location(d_location)
-        .build()?;
+    let o_d_x86 = o_d_x86(d_location).await?;
+    let o_d_x86_rocm = o_d_x86_rocm(d_location).await?;
+    let o_d_arm = o_d_arm(d_location).await?;
+    let o_d_arm_jet5 = o_d_arm_jet5(d_location).await?;
+    let o_d_arm_jet6 = o_d_arm_jet6(d_location).await?;
 
-    let o_d_x86 = download(o_x86).await?;
-    let o_d_x86_rocm = download(o_x86_rocm).await?;
-    let o_d_arm = download(o_arm).await?;
-    let o_d_arm_jet5 = download(o_arm_jet5).await?;
-    let o_d_arm_jet6 = download(o_arm_jet6).await?;
-    //--------------------testing
     assert_eq!(o_d_x86.to_str().unwrap(), "./ollama-linux-amd64.tgz");
+
     assert_eq!(
         o_d_x86_rocm.to_str().unwrap(),
         "./ollama-linux-amd64-rocm.tgz"
     );
-    //---------------arm versions--------------
+
     assert_eq!(o_d_arm.to_str().unwrap(), "./ollama-linux-arm64.tgz");
+
     assert_eq!(
         o_d_arm_jet5.to_str().unwrap(),
         "./ollama-linux-arm64-jetpack5.tgz"
     );
+
     assert_eq!(
         o_d_arm_jet6.to_str().unwrap(),
         "./ollama-linux-arm64-jetpack6.tgz"
     );
 
     Ok(())
+}
+
+// general function to be reused among other functions!!
+async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathBuf> {
+    let o_download = OllamaDownload::builder()?
+        .platform(platform)
+        .tag_version(TVersion::Latest)
+        .d_location(d_location)
+        .build()?;
+
+    download(o_download).await
+}
+
+// downloads [ollama-linux-amd64.tgz]
+async fn o_d_x86(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Linux(Linux::X86 { rocm: false });
+    download_ollama(d_location, platform).await
+}
+
+// downloads [ollama-linux-amd64-rocm.tgz]
+async fn o_d_x86_rocm(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Linux(Linux::X86 { rocm: true });
+    download_ollama(d_location, platform).await
+}
+
+// downloads [ollama-linux-arm64.tgz]
+async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Linux(Linux::Arm(LinuxArm::Arm));
+    download_ollama(d_location, platform).await
+}
+// downloads [ollama-linux-arm64-jetpack5.tgz]
+async fn o_d_arm_jet5(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Linux(Linux::Arm(LinuxArm::Jetpack5));
+    download_ollama(d_location, platform).await
+}
+// downloads [ollama-linux-arm64-jetpack6.tgz]
+async fn o_d_arm_jet6(d_location: &Path) -> OResult<PathBuf> {
+    let platform = Platform::Linux(Linux::Arm(LinuxArm::Jetpack6));
+    download_ollama(d_location, platform).await
 }
