@@ -1,6 +1,6 @@
 [package]
 name = "ollama_td"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Allawiii <alighraibeh87@gmail.com>"]
 license = "MIT"
@@ -8,6 +8,6 @@ description = "ollama cli tool downloader"
 [dependencies]
 octocrab = "0.43.0"
 tokio = { version = "1.43.0", features = ["full"] }
-reqwest = "0.12.12"
+reqwest = { version = "0.12.12", features = ["rustls-tls"] }
 sys-info = "0.9.1"                                  # to get the os kernel type {linux ,Windows ,Darwin}
 # regex = "1.11.1"
