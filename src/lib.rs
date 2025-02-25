@@ -10,6 +10,8 @@
 //!
 //! Ollama tool **```v5.8```** and beyond changed ***```ollama-darwin```*** to ***```ollama-darwin.tgz```***.
 //!
+//! ```download(o_download,f_stream)``` now accepts optional function to give you the ability to customize the process of downloading the tool.
+//!
 //! # Examples
 //! Different platforms have different several options available .
 //! ## Windows
