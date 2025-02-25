@@ -1,4 +1,4 @@
-# ollama_td ![License: MIT](https://img.shields.io/badge/license-MIT-blue) [![ollama_td on crates.io](https://img.shields.io/crates/v/ollama_td)](https://crates.io/crates/ollama_td) [![ollama_td on docs.rs](https://docs.rs/ollama_td/badge.svg)](https://docs.rs/ollama_td)
+# ollama_td [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE) [![ollama_td on crates.io](https://img.shields.io/crates/v/ollama_td)](https://crates.io/crates/ollama_td) [![ollama_td on docs.rs](https://docs.rs/ollama_td/badge.svg)](https://docs.rs/ollama_td)
 
 ollama_td : `ollama tool download` crate , which is a crate used exclusively to download the ollama command line tool or the binary itself ,
 
@@ -11,6 +11,8 @@ automatically unpack and place it where ever you want .
 ## Breaking Changes
 
 Ollama tool **`v5.8`** and beyond changed ***`ollama-darwin`*** to ***`ollama-darwin.tgz`***.
+
+`download(o_download,f_stream)` now accepts optional function to give you the ability to customize the process of downloading the tool.
 
 ## Examples
 
