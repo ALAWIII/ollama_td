@@ -28,7 +28,7 @@ async fn download_ollama(
         .tag_version(tag_version)
         .build()?;
 
-    download(o_download).await
+    download(o_download, None).await
 }
 
 // downloads [ollama-windows-amd64.zip]

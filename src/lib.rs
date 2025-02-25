@@ -6,6 +6,10 @@
 //!
 //!  automatically unpack and place it where ever you want .
 //!
+//! # Breaking Changes
+//!
+//! Ollama tool **```v5.8```** and beyond changed ***```ollama-darwin```*** to ***```ollama-darwin.tgz```***.
+//!
 //! # Examples
 //! Different platforms have different several options available .
 //! ## Windows
@@ -19,7 +23,7 @@
 //!```
 //! ## Unix
 //! you have two options :
-//! - ollama-darwin
+//! - ollama-darwin.tgz
 //! - Ollama-darwin.zip
 //!
 //! ```no_run

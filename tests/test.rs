@@ -34,7 +34,7 @@ fn windows() {
 fn unix() {
     let u_bin = Platform::Unix(Unix::DarwinBin);
     let u_zip = Platform::Unix(Unix::DarwinZip);
-    assert_eq!(u_bin.to_string(), "darwin".to_owned());
+    assert_eq!(u_bin.to_string(), "darwin.tgz".to_owned());
     assert_eq!(u_zip.to_string(), "darwin.zip".to_owned());
 }
 //-----------------------------------
@@ -59,15 +59,15 @@ fn ollama_d_builder() {
 //----------------------------------------------------------
 
 #[tokio::test]
-#[ignore = "It successfully passed but consumes time on every excution of all tests!!"]
-async fn donwload_o_tool() {
+//#[ignore = "It successfully passed but consumes time on every excution of all tests!!"]
+async fn download_o_tool() {
     let o_download = OllamaDownload::builder()
         .unwrap()
         .tag_version(TVersion::Latest)
-        .platform(Platform::Unix(Unix::DarwinBin))
+        .platform(Platform::Unix(Unix::DarwinZip))
         .d_location(Path::new("."))
         .build()
         .unwrap();
-    let downloaded = download(o_download).await.unwrap();
-    assert_eq!(downloaded.to_str().unwrap(), "./ollama-darwin");
+    let downloaded = download(o_download, None).await.unwrap();
+    assert_eq!(downloaded.to_str().unwrap(), "./Ollama-darwin.zip");
 }

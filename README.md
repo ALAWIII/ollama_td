@@ -8,6 +8,10 @@ you can automate the download of the compressed (e.g. zip or tgz) CLI tool and
 
 automatically unpack and place it where ever you want .
 
+## Breaking Changes
+
+Ollama tool **`v5.8`** and beyond changed ***`ollama-darwin`*** to ***`ollama-darwin.tgz`***.
+
 ## Examples
 
 Different platforms have different several options available .
@@ -51,7 +55,7 @@ async fn download_ollama(
         .tag_version(tag_version)
         .build()?;
 
-    download(o_download).await
+    download(o_download, None).await
 }
 
 // downloads [ollama-windows-amd64.zip]
@@ -77,7 +81,7 @@ async fn o_d_exe(d_location: &Path) -> OResult<PathBuf> {
 
 you have two options :
 
-* ollama-darwin
+* ollama-darwin.tgz
 * Ollama-darwin.zip
 
 ```rust
@@ -91,7 +95,7 @@ async fn main() -> OResult<()> {
    let o_d_bin = o_d_bin(d_location).await?;
    let o_d_zip = o_d_zip(d_location).await?;
 
-   assert_eq!(o_d_bin.to_str().unwrap(), "./ollama-darwin");
+   assert_eq!(o_d_bin.to_str().unwrap(), "./ollama-darwin.tgz");
    assert_eq!(o_d_zip.to_str().unwrap(), "./Ollama-darwin.zip");
    Ok(())
 }
@@ -105,7 +109,7 @@ async fn o_d_bin(d_location: &Path) -> OResult<PathBuf> {
        .tag_version(TVersion::Latest) //you can always set it to the latest version!!
        .d_location(d_location)
        .build()?;
-   download(o_bin).await
+   download(o_bin, None).await
 }
 
 // this example attempts to download the ```Ollama-darwin.zip``` CLI compressed version !!!
@@ -117,7 +121,7 @@ async fn o_d_zip(d_location: &Path) -> OResult<PathBuf> {
        .tag_version(TVersion::Tag("v0.5.7".to_owned())) // you can specify the tag version!!
        .d_location(d_location)
        .build()?;
-   download(o_zip).await
+   download(o_zip, None).await
 }
 
 ```
@@ -176,7 +180,7 @@ async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathB
        .d_location(d_location)
        .build()?;
 
-   download(o_download).await
+   download(o_download, None).await
 }
 
 // downloads [ollama-linux-amd64.tgz]

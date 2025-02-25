@@ -1,3 +1,4 @@
 /target
 out.txt
 src/bin/usecase.rs
+src/bin/progress_stream.rs

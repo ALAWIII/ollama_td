@@ -1,18 +1,27 @@
 use crate::*;
 use octocrab::{models::repos::Asset, Octocrab};
-use std::io::copy;
+use reqwest::Response;
+use std::path::Path;
 use std::path::PathBuf;
-use std::{fs::File, path::Path};
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 
 /// Accepts OllamaDownload object and after successfully downloading your tool it will return the path to where your tool is stored!!!
 ///
+/// By default ,when you specify f_stream to None , it will use default quick method to accomplish the download process.
+///
+/// You can specify ```f_stream``` function that will accept Response as an argument ,then you can specify how you would like to handle the download process ,and if you want to stream the progress of the download file.
+///
 /// As an example returns: ```./ollama-linux-amd64-rocm.tgz``` , with the full name of the tool at the end !!!
-pub async fn download(mut o_download: OllamaDownload) -> OResult<PathBuf> {
+pub async fn download(
+    mut o_download: OllamaDownload,
+    f_stream: Option<fn(res: Response) -> OResult<PathBuf>>,
+) -> OResult<PathBuf> {
     let platform = o_download.get_platform();
     let tag_version = o_download.get_tag_version();
     let o_asset = fetch_ollama_asset(tag_version, platform).await?;
     let d_location = o_download.get_d_location();
-    let downloaded = download_ollama_tool(o_asset, d_location).await?;
+    let downloaded = download_ollama_tool(o_asset, d_location, f_stream).await?;
     Ok(downloaded)
 }
 
@@ -38,14 +47,35 @@ async fn fetch_ollama_asset(tag_version: &TVersion, platform: &Platform) -> ORes
 }
 
 /// downloads the specified version of the ollama tool.
+/// by default ,when you specify f_stream to None , it will use default quick method to accomplish the download process.
 ///
+/// you can specify f_stream function that will accept Response as an argument ,then you can specify how you would like to handle the download process ,and if you want to stream the progress of the download file.
 /// # FAILS
 /// when either connection problems , file path not correct OR failing when writing and coping the bytes of the downloaded file into the local non-voltile buffer.
-async fn download_ollama_tool(asset: Asset, d_path: &mut Path) -> OResult<PathBuf> {
+async fn download_ollama_tool(
+    asset: Asset,
+    d_path: &mut Path,
+    f_stream: Option<fn(res: Response) -> OResult<PathBuf>>,
+) -> OResult<PathBuf> {
     let full_path = d_path.join(asset.name);
-    let tool = reqwest::get(asset.browser_download_url).await?;
-    let mut file = File::create(&full_path)?;
-    copy(&mut tool.bytes().await?.as_ref(), &mut file)?;
+    let tool = reqwest::get(asset.browser_download_url)
+        .await?
+        .error_for_status()?;
+
+    if let Some(f) = f_stream {
+        return f(tool);
+    }
+
+    write_to_disk(tool, full_path).await
+}
+
+async fn write_to_disk(mut tool: Response, full_path: PathBuf) -> OResult<PathBuf> {
+    let mut file = File::create(&full_path).await?;
+
+    while let Some(chunk) = tool.chunk().await? {
+        file.write_all(&chunk).await?;
+    }
+    file.flush().await?;
     Ok(full_path)
 }
 

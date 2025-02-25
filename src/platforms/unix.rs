@@ -9,7 +9,7 @@ pub enum Unix {
 impl fmt::Display for Unix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let arch = match self {
-            Self::DarwinBin => "darwin",
+            Self::DarwinBin => "darwin.tgz",
             Self::DarwinZip => "darwin.zip",
         };
         write!(f, "{}", arch)
