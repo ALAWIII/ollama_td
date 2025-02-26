@@ -1,7 +1,8 @@
-use std::path::Path;
-
 use ollama_td::*;
-
+use reqwest::Response;
+use std::fs::File;
+use std::io::{Write, stdout};
+use std::path::{Path, PathBuf};
 //------------------
 #[test]
 fn linux() {
@@ -60,7 +61,7 @@ fn ollama_d_builder() {
 
 #[tokio::test]
 //#[ignore = "It successfully passed but consumes time on every excution of all tests!!"]
-async fn download_o_tool() {
+async fn download_o_tool() -> OResult<()> {
     let o_download = OllamaDownload::builder()
         .unwrap()
         .tag_version(TVersion::Latest)
@@ -68,6 +69,36 @@ async fn download_o_tool() {
         .d_location(Path::new("."))
         .build()
         .unwrap();
-    let downloaded = download(o_download, None).await.unwrap();
-    assert_eq!(downloaded.to_str().unwrap(), "./Ollama-darwin.zip");
+    let downloaded = download(o_download).await;
+    assert_eq!(downloaded?.to_str().unwrap(), "./Ollama-darwin.zip");
+    Ok(())
+}
+//----------------------------------
+
+async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> OResult<PathBuf> {
+    let content_length = res.content_length().unwrap_or(1) as f64;
+    let mut file = File::create(&full_path)?;
+    let mut recived = 0.0;
+    while let Some(c) = res.chunk().await? {
+        recived += c.len() as f64;
+        print!("\r{:.2}", (recived / content_length) * 100.0);
+        file.write_all(&c)?;
+        stdout().flush()?;
+    }
+    file.flush()?;
+    Ok(full_path.to_path_buf())
+}
+
+#[tokio::test]
+async fn test_download_custom() -> OResult<()> {
+    let o_download = OllamaDownload::builder()
+        .unwrap()
+        .tag_version(TVersion::Latest)
+        .platform(Platform::Unix(Unix::DarwinZip))
+        .d_location(Path::new("."))
+        .build()
+        .unwrap();
+    let downloaded = download_customize(o_download, download_custom_helper).await;
+    assert_eq!(downloaded?.to_str().unwrap(), "./Ollama-darwin.zip");
+    Ok(())
 }

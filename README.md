@@ -1,4 +1,4 @@
-# ollama_td [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE) [![ollama_td on crates.io](https://img.shields.io/crates/v/ollama_td)](https://crates.io/crates/ollama_td) [![ollama_td on docs.rs](https://docs.rs/ollama_td/badge.svg)](https://docs.rs/ollama_td)
+# ollama_td ![License: MIT](https://img.shields.io/badge/license-MIT-blue) [![ollama_td on crates.io](https://img.shields.io/crates/v/ollama_td)](https://crates.io/crates/ollama_td) [![ollama_td on docs.rs](https://docs.rs/ollama_td/badge.svg)](https://docs.rs/ollama_td)
 
 ollama_td : `ollama tool download` crate , which is a crate used exclusively to download the ollama command line tool or the binary itself ,
 
@@ -12,7 +12,9 @@ automatically unpack and place it where ever you want .
 
 Ollama tool **`v5.8`** and beyond changed ***`ollama-darwin`*** to ***`ollama-darwin.tgz`***.
 
-`download(o_download,f_stream)` now accepts optional function to give you the ability to customize the process of downloading the tool.
+`download_customize(o_download, f_stream)` now accepts function to give you the ability to customize the process of downloading the tool.
+
+otherwise , you can use the default implementation provided by the crate which is `download(o_download)`.
 
 ## Examples
 
@@ -28,6 +30,9 @@ you have three options :
 
 ```rust
 use ollama_td::*;
+use reqwest::Response;
+use std::fs::File;
+use std::io::{Write, stdout};
 use std::path::{Path, PathBuf};
 
 #[tokio::main]
@@ -57,7 +62,7 @@ async fn download_ollama(
         .tag_version(tag_version)
         .build()?;
 
-    download(o_download, None).await
+    download_customize(o_download, download_custom_helper).await
 }
 
 // downloads [ollama-windows-amd64.zip]
@@ -75,6 +80,21 @@ async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
 async fn o_d_exe(d_location: &Path) -> OResult<PathBuf> {
     let platform = Platform::Windows(Windows::BinExe);
     download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
+}
+
+// is used with download_custom function , here we stream to the disk storage and to the stdout!!
+async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> OResult<PathBuf> {
+    let content_length = res.content_length().unwrap_or(1) as f64;
+    let mut file = File::create(&full_path)?;
+    let mut recived = 0.0;
+    while let Some(c) = res.chunk().await? {
+        recived += c.len() as f64;
+        print!("\r{:.2}", (recived / content_length) * 100.0);
+        file.write_all(&c)?;
+        stdout().flush()?;
+    }
+    file.flush()?;
+    Ok(full_path.to_path_buf())
 }
 
 ```
@@ -111,7 +131,7 @@ async fn o_d_bin(d_location: &Path) -> OResult<PathBuf> {
        .tag_version(TVersion::Latest) //you can always set it to the latest version!!
        .d_location(d_location)
        .build()?;
-   download(o_bin, None).await
+   download(o_bin).await
 }
 
 // this example attempts to download the ```Ollama-darwin.zip``` CLI compressed version !!!
@@ -123,7 +143,7 @@ async fn o_d_zip(d_location: &Path) -> OResult<PathBuf> {
        .tag_version(TVersion::Tag("v0.5.7".to_owned())) // you can specify the tag version!!
        .d_location(d_location)
        .build()?;
-   download(o_zip, None).await
+   download(o_zip).await
 }
 
 ```
@@ -182,7 +202,7 @@ async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathB
        .d_location(d_location)
        .build()?;
 
-   download(o_download, None).await
+   download(o_download).await
 }
 
 // downloads [ollama-linux-amd64.tgz]

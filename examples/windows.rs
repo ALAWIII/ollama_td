@@ -1,4 +1,7 @@
 use ollama_td::*;
+use reqwest::Response;
+use std::fs::File;
+use std::io::{Write, stdout};
 use std::path::{Path, PathBuf};
 
 #[tokio::main]
@@ -28,7 +31,7 @@ async fn download_ollama(
         .tag_version(tag_version)
         .build()?;
 
-    download(o_download, None).await
+    download_customize(o_download, download_custom_helper).await
 }
 
 // downloads [ollama-windows-amd64.zip]
@@ -46,4 +49,19 @@ async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
 async fn o_d_exe(d_location: &Path) -> OResult<PathBuf> {
     let platform = Platform::Windows(Windows::BinExe);
     download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
+}
+
+// is used with download_custom function , here we stream to the disk storage and to the stdout!!
+async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> OResult<PathBuf> {
+    let content_length = res.content_length().unwrap_or(1) as f64;
+    let mut file = File::create(&full_path)?;
+    let mut recived = 0.0;
+    while let Some(c) = res.chunk().await? {
+        recived += c.len() as f64;
+        print!("\r{:.2}", (recived / content_length) * 100.0);
+        file.write_all(&c)?;
+        stdout().flush()?;
+    }
+    file.flush()?;
+    Ok(full_path.to_path_buf())
 }

@@ -1,7 +1,7 @@
 [package]
 name = "ollama_td"
-version = "0.2.0"
-edition = "2021"
+version = "0.3.0"
+edition = "2024"
 authors = ["Allawiii <alighraibeh87@gmail.com>"]
 license = "MIT"
 description = "ollama cli tool downloader"

@@ -41,7 +41,7 @@ async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathB
         .d_location(d_location)
         .build()?;
 
-    download(o_download, None).await
+    download(o_download).await
 }
 
 // downloads [ollama-linux-amd64.tgz]

@@ -1,5 +1,5 @@
 use crate::*;
-use octocrab::{models::repos::Asset, Octocrab};
+use octocrab::{Octocrab, models::repos::Asset};
 use reqwest::Response;
 use std::path::Path;
 use std::path::PathBuf;
@@ -13,16 +13,29 @@ use tokio::io::AsyncWriteExt;
 /// You can specify ```f_stream``` function that will accept Response as an argument ,then you can specify how you would like to handle the download process ,and if you want to stream the progress of the download file.
 ///
 /// As an example returns: ```./ollama-linux-amd64-rocm.tgz``` , with the full name of the tool at the end !!!
-pub async fn download(
-    mut o_download: OllamaDownload,
-    f_stream: Option<fn(res: Response) -> OResult<PathBuf>>,
-) -> OResult<PathBuf> {
+pub async fn download(mut o_download: OllamaDownload) -> OResult<PathBuf> {
     let platform = o_download.get_platform();
     let tag_version = o_download.get_tag_version();
     let o_asset = fetch_ollama_asset(tag_version, platform).await?;
     let d_location = o_download.get_d_location();
-    let downloaded = download_ollama_tool(o_asset, d_location, f_stream).await?;
+    let downloaded = download_ollama_tool(o_asset, d_location).await?;
     Ok(downloaded)
+}
+
+/// used to give you the freedom to customize the download process , for example if you want to plug a GUI progress bar that views the download progress.
+pub async fn download_customize(
+    mut o_download: OllamaDownload,
+    f_stream: impl AsyncFnOnce(Response, &mut Path) -> OResult<PathBuf>,
+) -> OResult<PathBuf> {
+    let platform = o_download.get_platform();
+    let tag_version = o_download.get_tag_version();
+    let o_asset = fetch_ollama_asset(tag_version, platform).await?;
+    let tool = reqwest::get(o_asset.browser_download_url)
+        .await?
+        .error_for_status()?;
+    let mut full_path = o_download.get_d_location().join(o_asset.name);
+
+    f_stream(tool, &mut full_path).await
 }
 
 /// accepts the tag_version and the platform and returns the associated Asset that describes the copy of the tool you want !!
@@ -52,19 +65,11 @@ async fn fetch_ollama_asset(tag_version: &TVersion, platform: &Platform) -> ORes
 /// you can specify f_stream function that will accept Response as an argument ,then you can specify how you would like to handle the download process ,and if you want to stream the progress of the download file.
 /// # FAILS
 /// when either connection problems , file path not correct OR failing when writing and coping the bytes of the downloaded file into the local non-voltile buffer.
-async fn download_ollama_tool(
-    asset: Asset,
-    d_path: &mut Path,
-    f_stream: Option<fn(res: Response) -> OResult<PathBuf>>,
-) -> OResult<PathBuf> {
+async fn download_ollama_tool(asset: Asset, d_path: &mut Path) -> OResult<PathBuf> {
     let full_path = d_path.join(asset.name);
     let tool = reqwest::get(asset.browser_download_url)
         .await?
         .error_for_status()?;
-
-    if let Some(f) = f_stream {
-        return f(tool);
-    }
 
     write_to_disk(tool, full_path).await
 }
@@ -82,7 +87,7 @@ async fn write_to_disk(mut tool: Response, full_path: PathBuf) -> OResult<PathBu
 //------------------------------------------- tests ------------
 #[cfg(test)]
 mod d_tests {
-    use super::{fetch_ollama_asset, Linux, OResult, Platform, TVersion};
+    use super::{Linux, OResult, Platform, TVersion, fetch_ollama_asset};
 
     #[tokio::test]
     async fn fetch_o_asset() -> OResult<()> {

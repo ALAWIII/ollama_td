@@ -10,7 +10,9 @@
 //!
 //! Ollama tool **```v5.8```** and beyond changed ***```ollama-darwin```*** to ***```ollama-darwin.tgz```***.
 //!
-//! ```download(o_download,f_stream)``` now accepts optional function to give you the ability to customize the process of downloading the tool.
+//! ```download_customize(o_download, f_stream)``` now accepts function to give you the ability to customize the process of downloading the tool.
+//!
+//! otherwise , you can use the default implementation provided by the crate which is ```download(o_download)```.
 //!
 //! # Examples
 //! Different platforms have different several options available .

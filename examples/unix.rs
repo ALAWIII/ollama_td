@@ -22,7 +22,7 @@ async fn o_d_bin(d_location: &Path) -> OResult<PathBuf> {
         .tag_version(TVersion::Latest) //you can always set it to the latest version!!
         .d_location(d_location)
         .build()?;
-    download(o_bin, None).await
+    download(o_bin).await
 }
 
 // this example attempts to download the ```Ollama-darwin.zip``` CLI compressed version !!!
@@ -34,5 +34,5 @@ async fn o_d_zip(d_location: &Path) -> OResult<PathBuf> {
         .tag_version(TVersion::Tag("v0.5.7".to_owned())) // you can specify the tag version!!
         .d_location(d_location)
         .build()?;
-    download(o_zip, None).await
+    download(o_zip).await
 }
