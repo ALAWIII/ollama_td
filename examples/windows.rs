@@ -5,7 +5,7 @@ use std::io::{Write, stdout};
 use std::path::{Path, PathBuf};
 
 #[tokio::main]
-async fn main() -> OResult<()> {
+async fn main() -> Result<()> {
     let d_location = Path::new(".");
 
     let down_x86 = o_d_x86(d_location).await?;
@@ -24,7 +24,7 @@ async fn download_ollama(
     d_location: &Path,
     platform: Platform,
     tag_version: TVersion,
-) -> OResult<PathBuf> {
+) -> Result<PathBuf> {
     let o_download = OllamaDownload::builder()?
         .platform(platform)
         .d_location(d_location)
@@ -35,24 +35,24 @@ async fn download_ollama(
 }
 
 // downloads [ollama-windows-amd64.zip]
-async fn o_d_x86(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_x86(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Windows(Windows::X86);
     download_ollama(d_location, platform, TVersion::Latest).await
 }
 // downloads [ollama-windows-arm64.zip]
-async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_arm(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Windows(Windows::Arm);
     download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
 }
 
 // downloads [OllamaSetup.exe]
-async fn o_d_exe(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_exe(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Windows(Windows::BinExe);
     download_ollama(d_location, platform, TVersion::Tag("v0.5.7".to_string())).await
 }
 
 // is used with download_custom function , here we stream to the disk storage and to the stdout!!
-async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> OResult<PathBuf> {
+async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> Result<PathBuf> {
     let content_length = res.content_length().unwrap_or(1) as f64;
     let mut file = File::create(&full_path)?;
     let mut recived = 0.0;

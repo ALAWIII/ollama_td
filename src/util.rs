@@ -1,12 +1,11 @@
 use crate::Platform;
 use crate::*;
+pub use anyhow::Result;
+use anyhow::anyhow;
 use std::env;
-use std::error::Error;
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
 use sys_info::os_type;
-
-pub type OResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Debug)]
 /// provide the tag number or choose to set it to Latest which will choose that latest up-to-data available Asset!!!
@@ -41,7 +40,7 @@ pub struct OllamaDownload {
     tag_version: TVersion,
 }
 impl OllamaDownload {
-    pub fn builder() -> OResult<OllamaDownloadBuilder> {
+    pub fn builder() -> Result<OllamaDownloadBuilder> {
         OllamaDownloadBuilder::new()
     }
 }
@@ -79,8 +78,8 @@ pub struct OllamaDownloadBuilder {
 }
 
 impl OllamaDownloadBuilder {
-    pub fn new() -> OResult<Self> {
-        let current_folder = env::current_exe()?;
+    pub fn new() -> Result<Self> {
+        let current_folder = env::current_exe().map_err(|e| anyhow!(format!("e")))?;
         Ok(Self {
             platform: get_os_platform()?,
             d_location: current_folder.parent().unwrap().to_path_buf(),
@@ -105,7 +104,7 @@ impl OllamaDownloadBuilder {
         self.tag_version = tversion;
         self
     }
-    pub fn build(self) -> OResult<OllamaDownload> {
+    pub fn build(self) -> Result<OllamaDownload> {
         let odownload = OllamaDownload {
             platform: self.platform,
             d_location: self.d_location,
@@ -115,8 +114,8 @@ impl OllamaDownloadBuilder {
     }
 }
 //-------------------
-fn get_os_platform() -> OResult<Platform> {
-    let os_info = os_type()?;
+fn get_os_platform() -> Result<Platform> {
+    let os_info = os_type().map_err(|e| anyhow!(format!("{e}")))?;
     let platform = match os_info.as_str() {
         "Linux" => Platform::Linux(Linux::X86 { rocm: false }),
         "Darwin" => Platform::Unix(Unix::DarwinZip),

@@ -61,7 +61,7 @@ fn ollama_d_builder() {
 
 #[tokio::test]
 //#[ignore = "It successfully passed but consumes time on every excution of all tests!!"]
-async fn download_o_tool() -> OResult<()> {
+async fn download_o_tool() -> Result<()> {
     let o_download = OllamaDownload::builder()
         .unwrap()
         .tag_version(TVersion::Latest)
@@ -75,7 +75,7 @@ async fn download_o_tool() -> OResult<()> {
 }
 //----------------------------------
 
-async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> OResult<PathBuf> {
+async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> Result<PathBuf> {
     let content_length = res.content_length().unwrap_or(1) as f64;
     let mut file = File::create(&full_path)?;
     let mut recived = 0.0;
@@ -90,7 +90,7 @@ async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> ORes
 }
 
 #[tokio::test]
-async fn test_download_custom() -> OResult<()> {
+async fn test_download_custom() -> Result<()> {
     let o_download = OllamaDownload::builder()
         .unwrap()
         .tag_version(TVersion::Latest)

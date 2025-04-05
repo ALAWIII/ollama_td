@@ -33,6 +33,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.97"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcfed56ad506cb2c684a14971b8861fdc3baaaae314b9e5f9bb532cbe3ba7a4f"
+
+[[package]]
 name = "arc-swap"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -915,8 +921,9 @@ dependencies = [
 
 [[package]]
 name = "ollama_td"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
+ "anyhow",
  "bytes",
  "futures-util",
  "octocrab",

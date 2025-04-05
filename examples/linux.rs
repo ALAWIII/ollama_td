@@ -2,7 +2,7 @@ use ollama_td::*;
 use std::path::{Path, PathBuf};
 
 #[tokio::main]
-async fn main() -> OResult<()> {
+async fn main() -> Result<()> {
     let d_location = Path::new(".");
 
     let o_d_x86 = o_d_x86(d_location).await?;
@@ -34,7 +34,7 @@ async fn main() -> OResult<()> {
 }
 
 // general function to be reused among other functions!!
-async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathBuf> {
+async fn download_ollama(d_location: &Path, platform: Platform) -> Result<PathBuf> {
     let o_download = OllamaDownload::builder()?
         .platform(platform)
         .tag_version(TVersion::Latest)
@@ -45,29 +45,29 @@ async fn download_ollama(d_location: &Path, platform: Platform) -> OResult<PathB
 }
 
 // downloads [ollama-linux-amd64.tgz]
-async fn o_d_x86(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_x86(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Linux(Linux::X86 { rocm: false });
     download_ollama(d_location, platform).await
 }
 
 // downloads [ollama-linux-amd64-rocm.tgz]
-async fn o_d_x86_rocm(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_x86_rocm(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Linux(Linux::X86 { rocm: true });
     download_ollama(d_location, platform).await
 }
 
 // downloads [ollama-linux-arm64.tgz]
-async fn o_d_arm(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_arm(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Linux(Linux::Arm(LinuxArm::Arm));
     download_ollama(d_location, platform).await
 }
 // downloads [ollama-linux-arm64-jetpack5.tgz]
-async fn o_d_arm_jet5(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_arm_jet5(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Linux(Linux::Arm(LinuxArm::Jetpack5));
     download_ollama(d_location, platform).await
 }
 // downloads [ollama-linux-arm64-jetpack6.tgz]
-async fn o_d_arm_jet6(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_arm_jet6(d_location: &Path) -> Result<PathBuf> {
     let platform = Platform::Linux(Linux::Arm(LinuxArm::Jetpack6));
     download_ollama(d_location, platform).await
 }

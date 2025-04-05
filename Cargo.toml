@@ -1,6 +1,6 @@
 [package]
 name = "ollama_td"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 authors = ["Allawiii <alighraibeh87@gmail.com>"]
 license = "MIT"
@@ -13,3 +13,4 @@ sys-info = "0.9.1"                                           # to get the os ker
 # regex = "1.11.1"
 futures-util = "0.3.31"
 bytes = "1.10.0"
+anyhow = "1.0.97"

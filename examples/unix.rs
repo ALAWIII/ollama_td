@@ -2,7 +2,7 @@ use ollama_td::*;
 use std::path::{Path, PathBuf};
 
 #[tokio::main]
-async fn main() -> OResult<()> {
+async fn main() -> Result<()> {
     let d_location = Path::new(".");
 
     let o_d_bin = o_d_bin(d_location).await?;
@@ -14,7 +14,7 @@ async fn main() -> OResult<()> {
 }
 
 // this example attempts to download the ```ollama-darwin``` binary version !!!
-async fn o_d_bin(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_bin(d_location: &Path) -> Result<PathBuf> {
     let u_bin = Platform::Unix(Unix::DarwinBin);
 
     let o_bin = OllamaDownload::builder()?
@@ -26,7 +26,7 @@ async fn o_d_bin(d_location: &Path) -> OResult<PathBuf> {
 }
 
 // this example attempts to download the ```Ollama-darwin.zip``` CLI compressed version !!!
-async fn o_d_zip(d_location: &Path) -> OResult<PathBuf> {
+async fn o_d_zip(d_location: &Path) -> Result<PathBuf> {
     let u_zip = Platform::Unix(Unix::DarwinZip);
 
     let o_zip = OllamaDownload::builder()?
