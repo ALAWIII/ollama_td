@@ -52,7 +52,7 @@ async fn o_d_exe(d_location: &Path) -> Result<PathBuf> {
 }
 
 // is used with download_custom function , here we stream to the disk storage and to the stdout!!
-async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> Result<PathBuf> {
+async fn download_custom_helper(mut res: Response, full_path: PathBuf) -> Result<PathBuf> {
     let content_length = res.content_length().unwrap_or(1) as f64;
     let mut file = File::create(&full_path)?;
     let mut recived = 0.0;

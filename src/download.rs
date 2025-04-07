@@ -24,19 +24,23 @@ pub async fn download(mut o_download: OllamaDownload) -> Result<PathBuf> {
 }
 
 /// used to give you the freedom to customize the download process , for example if you want to plug a GUI progress bar that views the download progress.
-pub async fn download_customize(
+pub async fn download_customize<F, Fut>(
     mut o_download: OllamaDownload,
-    f_stream: impl AsyncFnOnce(Response, &mut Path) -> Result<PathBuf>,
-) -> Result<PathBuf> {
+    f_stream: F,
+) -> Result<PathBuf>
+where
+    F: FnOnce(Response, PathBuf) -> Fut,
+    Fut: Future<Output = Result<PathBuf>>,
+{
     let platform = o_download.get_platform();
     let tag_version = o_download.get_tag_version();
     let o_asset = fetch_ollama_asset(tag_version, platform).await?;
     let tool = reqwest::get(o_asset.browser_download_url)
         .await?
         .error_for_status()?;
-    let mut full_path = o_download.get_d_location().join(o_asset.name);
+    let full_path = o_download.get_d_location().join(o_asset.name);
 
-    f_stream(tool, &mut full_path).await
+    f_stream(tool, full_path).await
 }
 
 /// accepts the tag_version and the platform and returns the associated Asset that describes the copy of the tool you want !!

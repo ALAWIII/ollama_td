@@ -75,7 +75,7 @@ async fn download_o_tool() -> Result<()> {
 }
 //----------------------------------
 
-async fn download_custom_helper(mut res: Response, full_path: &mut Path) -> Result<PathBuf> {
+async fn download_custom_helper(mut res: Response, full_path: PathBuf) -> Result<PathBuf> {
     let content_length = res.content_length().unwrap_or(1) as f64;
     let mut file = File::create(&full_path)?;
     let mut recived = 0.0;
